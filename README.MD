@@ -320,12 +320,13 @@ http://localhost:8000/api/schema/
 
 | Module | Documentation |
 |---------|---------------|
-| Accounts | `API_DOCUMENTATION/accounts_api.md` |
-| Journey | `API_DOCUMENTATION/journey_api.md` |
-| Reaction | `API_DOCUMENTATION/reaction_api.md` |
-| Feed | `API_DOCUMENTATION/feed_api.md` |
-| Score | `API_DOCUMENTATION/score_api.md` |
-| Audit | `API_DOCUMENTATION/audit_api.md` |
+| Accounts | [Accounts api](API_DOCUMENTATION/accounts_api.md) |
+| Journey | [Journey api](API_DOCUMENTATION/journey_api.md) |
+| Reaction | [Reaction api](API_DOCUMENTATION/reaction_api.md) |
+| Feed | [Feed api](API_DOCUMENTATION/feed_api.md) |
+| Score | [Score api](API_DOCUMENTATION/score_api.md) |
+| Audit | [Audit api](API_DOCUMENTATION/audit_api.md) |
+| Feed | [Feed api](API_DOCUMENTATION/feed_api.md) |
 
 > **Note**
 >
@@ -398,7 +399,7 @@ Level = floor(√(Total Score / 10)) + 1
 
 Distributed under the **MIT License**.
 
-See the **LICENSE** file for additional information.
+See the **[LICENSE](LICENSE)** file for additional information.
 
 ---
 
