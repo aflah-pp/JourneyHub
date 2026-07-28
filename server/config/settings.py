@@ -156,8 +156,8 @@ SIMPLE_JWT = {
 }
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "REFERRAL UNDO  API",
-    "DESCRIPTION": "API documentation for the Referral Undo platform.",
+    "TITLE": "JOURNEY HUB  API",
+    "DESCRIPTION": "API documentation for the Journey Hub platform.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "COMPONENT_SPLIT_REQUEST": True,
