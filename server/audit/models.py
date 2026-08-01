@@ -49,9 +49,7 @@ class ReportedItemManager(models.Manager):
     def for_target(self, target):
         """Return all reports for a specific target object."""
         content_type = ContentType.objects.get_for_model(target)
-        return self.get_queryset().filter(
-            content_type=content_type, object_id=target.pk
-        )
+        return self.get_queryset().filter(content_type=content_type, object_id=target.pk)
 
     def by_reporter(self, user):
         """Return all reports by a specific reporter."""
@@ -74,9 +72,7 @@ class ReportedItem(UUIDPrimaryKeyMixin, TimeStampMixin):
     content_type = models.ForeignKey(
         ContentType,
         on_delete=models.CASCADE,
-        limit_choices_to={
-            "model__in": ["journey", "journeyupdate", "comment", "commentreply"]
-        },
+        limit_choices_to={"model__in": ["journey", "journeyupdate", "comment", "commentreply"]},
     )
     object_id = models.UUIDField()
     target = GenericForeignKey("content_type", "object_id")
@@ -161,9 +157,7 @@ class ReportedItem(UUIDPrimaryKeyMixin, TimeStampMixin):
         self.moderator = moderator
         self.resolved_at = timezone.now()
         self.resolution_note = note
-        self.save(
-            update_fields=["status", "moderator", "resolved_at", "resolution_note"]
-        )
+        self.save(update_fields=["status", "moderator", "resolved_at", "resolution_note"])
 
     def update_status(self, new_status):
         """Update report status (for under_review, needs_info)."""
@@ -205,6 +199,8 @@ class ActivityLog(UUIDPrimaryKeyMixin, TimeStampMixin):
         VERIFY_EMAIL = "VERIFY_EMAIL", "Verify Email"
         PASSWORD_RESET = "PASSWORD_RESET", "Password Reset"
         PASSWORD_CHANGE = "PASSWORD_CHANGE", "Password Change"
+        CLEAR_DATA = "CLEAR_DATA", "Clear Data"
+        DELETE_ACCOUNT = "DELETE ACCOUNT", "Delete Account"
 
         CREATE = "CREATE", "Create"
         UPDATE = "UPDATE", "Update"
@@ -300,7 +296,5 @@ class ActivityLog(UUIDPrimaryKeyMixin, TimeStampMixin):
         if self.pk is not None:
 
             if ActivityLog.objects.filter(pk=self.pk).exists():
-                raise ValueError(
-                    "ActivityLog entries are immutable and cannot be updated."
-                )
+                raise ValueError("ActivityLog entries are immutable and cannot be updated.")
         super().save(*args, **kwargs)

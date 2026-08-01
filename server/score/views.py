@@ -96,15 +96,20 @@ class LeaderboardView(generics.ListAPIView):
         page = self.paginate_queryset(queryset)
 
         if page is not None:
+            page_number = self.paginator.page.number
+            page_size = self.paginator.get_page_size(request)
 
-            start_rank = (page.number - 1) * self.paginator.page_size + 1
+            start_rank = ((page_number - 1) * page_size) + 1
+
             for idx, item in enumerate(page):
-                setattr(item, "rank", start_rank + idx)
+                item.rank = start_rank + idx
+
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
-        for idx, item in enumerate(queryset, 1):
-            setattr(item, "rank", idx)
+        for idx, item in enumerate(queryset, start=1):
+            item.rank = idx
+
         serializer = self.get_serializer(queryset, many=True)
 
         return APIResponse(
@@ -127,9 +132,7 @@ class ScoreHistoryView(generics.ListAPIView):
 
     def get_queryset(self):
         return (
-            BuilderScoreHistory.objects.filter(user=self.request.user)
-            .select_related("user")
-            .order_by("-created_at")
+            BuilderScoreHistory.objects.filter(user=self.request.user).select_related("user").order_by("-created_at")
         )
 
     def list(self, request, *args, **kwargs):

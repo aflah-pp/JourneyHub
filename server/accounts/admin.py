@@ -104,7 +104,9 @@ class UserAdmin(BaseUserAdmin):
                 "fields": (
                     "last_login",
                     "created_at",
+                    "created_by",
                     "updated_at",
+                    "updated_by",
                 )
             },
         ),

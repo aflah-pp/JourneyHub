@@ -69,6 +69,7 @@ class ReportCreateSerializer(serializers.ModelSerializer):
         object_id = attrs.get("object_id")
 
         model_map = {
+            "user": "accounts.User",
             "journey": "journey.Journey",
             "journeyupdate": "journey.JourneyUpdate",
             "comment": "reaction.Comment",
@@ -77,9 +78,7 @@ class ReportCreateSerializer(serializers.ModelSerializer):
 
         model_path = model_map.get(content_type_key)
         if not model_path:
-            raise serializers.ValidationError(
-                f"Invalid content_type. Allowed: {list(model_map.keys())}"
-            )
+            raise serializers.ValidationError(f"Invalid content_type. Allowed: {list(model_map.keys())}")
 
         from django.apps import apps
 
@@ -107,9 +106,7 @@ class ReportCreateSerializer(serializers.ModelSerializer):
 class ReportResolveSerializer(serializers.Serializer):
     """Payload for resolving a report."""
 
-    status = serializers.ChoiceField(
-        choices=[ReportStatus.RESOLVED, ReportStatus.DISMISSED]
-    )
+    status = serializers.ChoiceField(choices=[ReportStatus.RESOLVED, ReportStatus.DISMISSED])
     note = serializers.CharField(
         required=False,
         allow_blank=True,
@@ -125,9 +122,7 @@ class ReportResolveSerializer(serializers.Serializer):
 class ReportUpdateStatusSerializer(serializers.Serializer):
     """Payload for updating report status."""
 
-    status = serializers.ChoiceField(
-        choices=[ReportStatus.UNDER_REVIEW, ReportStatus.NEEDS_INFO]
-    )
+    status = serializers.ChoiceField(choices=[ReportStatus.UNDER_REVIEW, ReportStatus.NEEDS_INFO])
     note = serializers.CharField(
         required=False,
         allow_blank=True,

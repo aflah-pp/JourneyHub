@@ -27,10 +27,15 @@ class TimeStampMixin(models.Model):
     def save(self, *args, **kwargs):
         request = get_current_request()
 
-        if request and request.user.is_authenticated:
-            if not self.pk and not self.created_by_id:
-                self.created_by = request.user
-        self.updated_by = request.user
+        user = None
+        if request:
+            user = getattr(request, "user", None)
+
+        if user and user.is_authenticated:
+            if self._state.adding and self.created_by_id is None:
+                self.created_by = user
+
+            self.updated_by = user
 
         super().save(*args, **kwargs)
 

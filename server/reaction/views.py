@@ -422,7 +422,6 @@ class AcceptedSolutionCreateView(generics.CreateAPIView):
     """
     Accept a comment as the solution for a journey update.
     POST /api/v1/updates/{update_id}/accept-solution/
-    Request body: {"comment_id": "comment_uuid"}
     """
 
     serializer_class = AcceptedSolutionCreateSerializer
@@ -431,27 +430,30 @@ class AcceptedSolutionCreateView(generics.CreateAPIView):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        update_id = self.kwargs["update_id"]
+
         update = get_object_or_404(
-            JourneyUpdate.objects.select_related("journey"), id=update_id
+            JourneyUpdate.objects.select_related("journey"),
+            id=self.kwargs["update_id"],
         )
+
         self.check_object_permissions(self.request, update)
+
         context["update"] = update
-        context["request"] = self.request
         return context
 
     def perform_create(self, serializer):
-        accepted = SolutionService.accept_solution(
+        serializer.instance = SolutionService.accept_solution(
             journey_update=self.get_serializer_context()["update"],
-            comment=self.get_serializer_context()["comment"],
+            comment=serializer.validated_data["comment"],
             accepted_by=self.request.user,
         )
-        serializer.instance = accepted
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
         self.perform_create(serializer)
+
         return APIResponse(
             data=AcceptedSolutionSerializer(serializer.instance).data,
             message="Solution accepted successfully.",

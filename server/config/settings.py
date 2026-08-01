@@ -39,7 +39,7 @@ THIRD_PARTY_APPS = [
     "cloudinary",
 ]
 
-SELF_APPS = ["accounts", "audit", "journey", "score", "reaction", "feed"]
+SELF_APPS = ["accounts", "audit", "journey", "score", "reaction", "feed","feedback"]
 
 INSTALLED_APPS = DEFAULT_APPS + THIRD_PARTY_APPS + SELF_APPS
 
@@ -61,7 +61,7 @@ AUTH_USER_MODEL = "accounts.User"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -114,10 +114,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # CORS CONFIG
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8080",
-    "http://127.0.0.1:8000",
-]
+CORS_ALLOWED_ORIGINS = ["http://localhost:8080", "http://127.0.0.1:8000", "http://localhost:5173"]
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -205,6 +202,7 @@ cloudinary.config(
     secure=True,
 )
 
+FRONTEND_VERIFY_EMAIL_URL = env("FRONTEND_VERIFY_EMAIL_URL", default="")
 FRONTEND_RESET_PASSWORD_URL = env("FRONTEND_RESET_PASSWORD_URL", default="")
 
 EMAIL_BACKEND = env(
@@ -217,3 +215,6 @@ EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@example.com")
+
+TELEGRAM_BOT_TOKEN = env("TELEGRAM_BOT_TOKEN", default="")
+TELEGRAM_CHAT_ID = env("TELEGRAM_CHAT_ID", default="")

@@ -1,5 +1,6 @@
 import logging
 
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
@@ -53,6 +54,7 @@ from .service import (
     TagService,
 )
 
+User = get_user_model()
 logger = logging.getLogger(__name__)
 
 
@@ -73,11 +75,15 @@ class JourneyListPublicView(generics.ListAPIView):
     throttle_classes = [JourneysAnonRateThrottle]
 
     def get_queryset(self):
-        return (
+        qs = (
             Journey.objects.visible_to(self.request.user)
             .select_related("owner", "owner__profile")
             .prefetch_related("owner__profile")
         )
+
+        if self.request.user.is_authenticated:
+            qs = qs.exclude(owner=self.request.user)
+        return qs
 
 
 @extend_schema(tags=["Journey"], summary="List journeys owned by authenticated user")
@@ -102,6 +108,60 @@ class JourneyListMyView(generics.ListAPIView):
             .not_deleted()
             .select_related("owner", "owner__profile")
             .prefetch_related("owner__profile")
+        )
+
+
+@extend_schema(
+    tags=["Journey"],
+    summary="List public journeys for a user",
+)
+class UserJourneyListView(generics.ListAPIView):
+    """
+    List all public journeys belonging to a user.
+
+    GET /api/v1/accounts/users/<username>/journeys/
+    """
+
+    serializer_class = JourneyListSerializer
+    pagination_class = StandardResultsSetPagination
+    permission_classes = [IsAuthenticated]
+
+    filter_backends = [
+        DjangoFilterBackend,
+        SearchFilter,
+        OrderingFilter,
+    ]
+    filterset_class = JourneyFilter
+    search_fields = [
+        "title",
+        "description",
+    ]
+    ordering_fields = [
+        "created_at",
+        "updated_at",
+        "title",
+        "latest_progress",
+    ]
+    ordering = ["-created_at"]
+
+    def get_queryset(self):
+        username = self.kwargs["username"]
+
+        owner = get_object_or_404(
+            User.objects.select_related("profile"),
+            username__iexact=username,
+        )
+
+        return (
+            Journey.objects.filter(
+                owner=owner,
+                visibility=Journey.Visibility.PUBLIC,
+            )
+            .not_deleted()
+            .select_related(
+                "owner",
+                "owner__profile",
+            )
         )
 
 
@@ -165,9 +225,7 @@ class JourneyCreateView(generics.CreateAPIView):
         return context
 
     def perform_create(self, serializer):
-        journey = JourneyService.create_journey(
-            user=self.request.user, validated_data=serializer.validated_data
-        )
+        journey = JourneyService.create_journey(user=self.request.user, validated_data=serializer.validated_data)
         serializer.instance = journey
 
         ActivityLogService.log_activity(
@@ -187,9 +245,7 @@ class JourneyCreateView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
 
         if request.content_type and "multipart/form-data" in request.content_type:
-            data = (
-                request.data.dict() if hasattr(request.data, "dict") else request.data
-            )
+            data = request.data.dict() if hasattr(request.data, "dict") else request.data
             if "cover_image" in request.FILES:
                 data["cover_image"] = request.FILES["cover_image"]
         else:
@@ -220,9 +276,7 @@ class JourneyUpdateView(generics.UpdateAPIView):
         return Journey.objects.owned_by(self.request.user).not_deleted()
 
     def perform_update(self, serializer):
-        journey = JourneyService.update_journey(
-            journey=serializer.instance, validated_data=serializer.validated_data
-        )
+        journey = JourneyService.update_journey(journey=serializer.instance, validated_data=serializer.validated_data)
         serializer.instance = journey
 
     def update(self, request, *args, **kwargs):
@@ -230,9 +284,7 @@ class JourneyUpdateView(generics.UpdateAPIView):
         instance = self.get_object()
 
         if request.content_type and "multipart/form-data" in request.content_type:
-            data = (
-                request.data.dict() if hasattr(request.data, "dict") else request.data
-            )
+            data = request.data.dict() if hasattr(request.data, "dict") else request.data
             if "cover_image" in request.FILES:
                 data["cover_image"] = request.FILES["cover_image"]
         else:
@@ -300,9 +352,7 @@ class JourneyDeleteView(generics.DestroyAPIView):
         )
 
 
-@extend_schema(
-    tags=["Journey Updates"], summary="List all updates for a specific journey"
-)
+@extend_schema(tags=["Journey Updates"], summary="List all updates for a specific journey")
 class JourneyUpdateListView(generics.ListAPIView):
     """
     List all updates for a specific journey.
@@ -320,9 +370,7 @@ class JourneyUpdateListView(generics.ListAPIView):
 
     def get_queryset(self):
         journey_id = self.kwargs["journey_id"]
-        journey = get_object_or_404(
-            Journey.objects.visible_to(self.request.user), id=journey_id
-        )
+        journey = get_object_or_404(Journey.objects.visible_to(self.request.user), id=journey_id)
         return (
             JourneyUpdate.objects.for_journey(journey)
             .not_deleted()
@@ -331,9 +379,7 @@ class JourneyUpdateListView(generics.ListAPIView):
         )
 
 
-@extend_schema(
-    tags=["Journey Updates"], summary="Get detailed view of a journey update"
-)
+@extend_schema(tags=["Journey Updates"], summary="Get detailed view of a journey update")
 class JourneyUpdateDetailView(generics.RetrieveAPIView):
     """
     Get detailed view of a journey update.
@@ -388,9 +434,7 @@ class JourneyUpdateCreateView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         journey = self.get_journey()
-        update = JourneyUpdateService.create_update(
-            journey=journey, validated_data=serializer.validated_data
-        )
+        update = JourneyUpdateService.create_update(journey=journey, validated_data=serializer.validated_data)
         serializer.instance = update
 
     def create(self, request, *args, **kwargs):
@@ -417,9 +461,7 @@ class JourneyUpdateUpdateView(generics.UpdateAPIView):
 
     def get_queryset(self):
         return (
-            JourneyUpdate.objects.filter(journey_id=self.kwargs["journey_id"])
-            .not_deleted()
-            .select_related("journey")
+            JourneyUpdate.objects.filter(journey_id=self.kwargs["journey_id"]).not_deleted().select_related("journey")
         )
 
     def perform_update(self, serializer):
@@ -452,9 +494,7 @@ class JourneyUpdateDeleteView(generics.DestroyAPIView):
     lookup_field = "id"
 
     def get_queryset(self):
-        return JourneyUpdate.objects.filter(
-            journey_id=self.kwargs["journey_id"]
-        ).not_deleted()
+        return JourneyUpdate.objects.filter(journey_id=self.kwargs["journey_id"]).not_deleted()
 
     def destroy(self, request, *args, **kwargs):
         update = self.get_object()
@@ -465,9 +505,7 @@ class JourneyUpdateDeleteView(generics.DestroyAPIView):
         )
 
 
-@extend_schema(
-    tags=["Journey Updates"], summary="Update tags for a specific journey update"
-)
+@extend_schema(tags=["Journey Updates"], summary="Update tags for a specific journey update")
 class JourneyUpdateTagsView(generics.UpdateAPIView):
     """
     Update tags for a specific journey update.
@@ -481,9 +519,7 @@ class JourneyUpdateTagsView(generics.UpdateAPIView):
 
     def get_queryset(self):
         return (
-            JourneyUpdate.objects.filter(journey_id=self.kwargs["journey_id"])
-            .not_deleted()
-            .select_related("journey")
+            JourneyUpdate.objects.filter(journey_id=self.kwargs["journey_id"]).not_deleted().select_related("journey")
         )
 
     def patch(self, request, *args, **kwargs):
@@ -531,9 +567,7 @@ class JourneyImageCreateView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
 
         if request.content_type and "multipart/form-data" in request.content_type:
-            data = (
-                request.data.dict() if hasattr(request.data, "dict") else request.data
-            )
+            data = request.data.dict() if hasattr(request.data, "dict") else request.data
             if "image" in request.FILES:
                 data["image"] = request.FILES["image"]
         else:
@@ -560,9 +594,9 @@ class JourneyImageDeleteView(generics.DestroyAPIView):
     lookup_field = "id"
 
     def get_queryset(self):
-        return JourneyImage.objects.filter(
-            journey_update_id=self.kwargs["update_id"]
-        ).select_related("journey_update__journey")
+        return JourneyImage.objects.filter(journey_update_id=self.kwargs["update_id"]).select_related(
+            "journey_update__journey"
+        )
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -597,9 +631,7 @@ class JourneyImageReorderView(generics.UpdateAPIView):
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
 
-        journey_update = get_object_or_404(
-            JourneyUpdate.objects.select_related("journey"), id=update_id
-        )
+        journey_update = get_object_or_404(JourneyUpdate.objects.select_related("journey"), id=update_id)
         self.check_object_permissions(request, journey_update)
 
         ImageService.reorder_images(journey_update, ordered_ids)
@@ -620,7 +652,7 @@ class JourneySearchView(generics.ListAPIView):
     serializer_class = JourneyListSerializer
     pagination_class = StandardResultsSetPagination
     filter_backends = [SearchFilter, OrderingFilter]
-    search_fields = ["title", "description"]
+    search_fields = ["title"]
     ordering_fields = ["created_at", "updated_at", "latest_progress"]
     ordering = ["-created_at"]
 

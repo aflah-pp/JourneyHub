@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from accounts.serializers import MiniUserSerializer
+from reaction.models import Like, SavedJourney, SavedUpdate
 from shared.services.html_sanitizer import sanitize_html
 
 from .models import (
@@ -42,9 +43,7 @@ class JourneyImageSerializer(serializers.ModelSerializer):
 
     def get_cloudinary_url(self, obj):
         if obj.image:
-            return obj.image.url.replace(
-                "/upload/", "/upload/q_auto,f_auto,w_600,h_400,c_limit/"
-            )
+            return obj.image.url.replace("/upload/", "/upload/q_auto,f_auto,w_600,h_400,c_limit/")
         return None
 
 
@@ -89,9 +88,7 @@ class JourneyListSerializer(serializers.ModelSerializer):
 
     def get_cover_image_url(self, obj):
         if obj.cover_image:
-            return obj.cover_image.url.replace(
-                "/upload/", "/upload/q_auto,f_auto,w_400,h_200,c_fill/"
-            )
+            return obj.cover_image.url.replace("/upload/", "/upload/q_auto,f_auto,w_400,h_200,c_fill/")
         return None
 
 
@@ -100,6 +97,7 @@ class JourneyDetailSerializer(serializers.ModelSerializer):
 
     owner = MiniUserSerializer(read_only=True)
     latest_progress = serializers.IntegerField(read_only=True)
+    is_saved_by_me = serializers.SerializerMethodField()
     cover_image_url = serializers.SerializerMethodField()
 
     class Meta:
@@ -114,6 +112,7 @@ class JourneyDetailSerializer(serializers.ModelSerializer):
             "visibility",
             "update_count",
             "latest_progress",
+            "is_saved_by_me",
             "created_at",
             "updated_at",
             "owner",
@@ -122,10 +121,21 @@ class JourneyDetailSerializer(serializers.ModelSerializer):
 
     def get_cover_image_url(self, obj):
         if obj.cover_image:
-            return obj.cover_image.url.replace(
-                "/upload/", "/upload/q_auto,f_auto,w_800,h_400,c_fill/"
-            )
+            return obj.cover_image.url.replace("/upload/", "/upload/q_auto,f_auto,w_800,h_400,c_fill/")
         return None
+
+    def get_is_saved_by_me(self, obj):
+        """Check if the current user saved this update."""
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return False
+
+        try:
+            if hasattr(obj, "saved_prefetched") and obj.saved_prefetched is not None:
+                return any(save.user_id == request.user.id for save in obj.saved_prefetched)
+            return SavedJourney.objects.filter(user=request.user, journey=obj).exists()
+        except Exception:
+            return False
 
 
 class JourneyCreateSerializer(serializers.ModelSerializer):
@@ -221,7 +231,9 @@ class JourneyUpdateDetailSerializer(serializers.ModelSerializer):
     images = JourneyImageSerializer(many=True, read_only=True)
     tags = JourneyUpdateTagSerializer(many=True, read_only=True)
     effective_visibility = serializers.CharField(read_only=True)
-
+    journey_owner = MiniUserSerializer(source="journey.owner", read_only=True)
+    is_liked_by_me = serializers.SerializerMethodField()
+    is_saved_by_me = serializers.SerializerMethodField()
     like_count = serializers.IntegerField(read_only=True)
     comment_count = serializers.IntegerField(read_only=True)
 
@@ -240,10 +252,39 @@ class JourneyUpdateDetailSerializer(serializers.ModelSerializer):
             "comment_count",
             "created_at",
             "updated_at",
+            "journey_owner",
+            "is_liked_by_me",
+            "is_saved_by_me",
             "images",
             "tags",
         )
         read_only_fields = fields
+
+    def get_is_liked_by_me(self, obj):
+        """Check if the current user liked this update."""
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return False
+
+        try:
+            if hasattr(obj, "likes_prefetched") and obj.likes_prefetched is not None:
+                return any(like.user_id == request.user.id for like in obj.likes_prefetched)
+            return Like.objects.filter(user=request.user, journey_update=obj).exists()
+        except Exception:
+            return False
+
+    def get_is_saved_by_me(self, obj):
+        """Check if the current user saved this update."""
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return False
+
+        try:
+            if hasattr(obj, "saved_prefetched") and obj.saved_prefetched is not None:
+                return any(save.user_id == request.user.id for save in obj.saved_prefetched)
+            return SavedUpdate.objects.filter(user=request.user, update=obj).exists()
+        except Exception:
+            return False
 
 
 class JourneyUpdateCreateSerializer(serializers.ModelSerializer):

@@ -19,6 +19,7 @@ from .views import (
     JourneyUpdateView,
     TagDetailView,
     TrendingTagsView,
+    UserJourneyListView,
 )
 
 app_name = "journey"
@@ -26,6 +27,11 @@ app_name = "journey"
 urlpatterns = [
     path("", JourneyListPublicView.as_view(), name="journey-list"),
     path("my/", JourneyListMyView.as_view(), name="journey-list-my"),
+    path(
+        "<str:username>/journeys/",
+        UserJourneyListView.as_view(),
+        name="user-journeys",
+    ),
     path("create/", JourneyCreateView.as_view(), name="journey-create"),
     path("<uuid:id>/", JourneyDetailView.as_view(), name="journey-detail"),
     path("<uuid:id>/update/", JourneyUpdateView.as_view(), name="journey-update"),
