@@ -1,6 +1,6 @@
 import { Route } from "react-router-dom";
 import MyScore from "@/pages/score/MyScore";
-import Leaderboard from "@/pages/score/Leaderboard";
+import Leaderboard from "@/pages/score/Leaderboard.jsx";
 import ReportLogs from "@/pages/audit/ReportLogs";
 
 export default function ScoreRoutes() {

@@ -4,7 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar, Clock, Eye, FolderTree } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { STATUS_COLORS, CATEGORY_LABELS } from "./journeyConstants";
+import { STATUS_COLORS, CATEGORY_LABELS } from "./JourneyConstants";
 
 export function JourneyInfoPanel({ journey }) {
   const initials = journey.owner?.username?.charAt(0)?.toUpperCase() || "U";

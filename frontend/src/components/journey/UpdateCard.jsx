@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Heart, MessageCircle, Clock, HelpCircle, FolderTree } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { MILESTONE_BADGE } from "./journeyConstants";
+import { MILESTONE_BADGE } from "./JourneyConstants";
 
 export function UpdateCard({ update, journeyId }) {
   const milestoneInfo = update.milestone_status ? MILESTONE_BADGE[update.milestone_status] : null;
