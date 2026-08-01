@@ -69,6 +69,7 @@ class ReportCreateSerializer(serializers.ModelSerializer):
         object_id = attrs.get("object_id")
 
         model_map = {
+            "user": "accounts.User",
             "journey": "journey.Journey",
             "journeyupdate": "journey.JourneyUpdate",
             "comment": "reaction.Comment",

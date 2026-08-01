@@ -23,6 +23,7 @@ urlpatterns = [
                 path("score/", include("score.urls"), name="score"),
                 path("audit/", include("audit.urls"), name="audit"),
                 path("feed/", include("feed.urls"), name="feed"),
+                path("feedback/", include("feedback.urls"), name="feedback"),
             ]
         ),
     ),

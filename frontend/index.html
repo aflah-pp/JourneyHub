@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <meta name="theme-color" content="#0f172a" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+    <link rel="icon" type="image/png" sizes="128x128" href="/favicon-128x128.png" />
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <link rel="preload" href="/journeyhub.png" as="image" type="image/png" />
+
+    <title>JourneyHub — Document Your Creative Process & Build in Public</title>
+
+    <meta
+      name="description"
+      content="JourneyHub is a social platform for documenting the process of building things. Share your journey, receive feedback, and connect with builders around the world."
+    />
+
+    <meta
+      name="keywords"
+      content="JourneyHub, build in public, creators, developers, builders, startup, progress tracking, project documentation"
+    />
+
+    <meta
+      name="robots"
+      content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1"
+    />
+
+    <link rel="canonical" href="https://journeyhub.netlify.app/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="JourneyHub" />
+    <meta
+      property="og:title"
+      content="JourneyHub — Document Your Creative Process & Build in Public"
+    />
+    <meta
+      property="og:description"
+      content="Share your journey, receive feedback, and connect with builders."
+    />
+    <meta property="og:url" content="https://journeyhub.netlify.app/" />
+    <meta property="og:image" content="https://journeyhub.netlify.app/journeyhub.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="1200" />
+    <meta property="og:image:alt" content="JourneyHub Logo" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="JourneyHub — Document Your Creative Process & Build in Public"
+    />
+    <meta
+      name="twitter:description"
+      content="Share your journey, receive feedback, and connect with builders."
+    />
+    <meta name="twitter:image" content="https://journeyhub.netlify.app/journeyhub.png" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "JourneyHub",
+        "url": "https://journeyhub.netlify.app/",
+        "description": "JourneyHub is a social platform for documenting the process of building things.",
+        "image": "https://journeyhub.netlify.app/journeyhub.png"
+      }
+    </script>
+
+    <script>
+      (() => {
+        const stored = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const theme = stored || (prefersDark ? "dark" : "light");
+
+        if (theme === "dark") {
+          document.documentElement.classList.add("dark");
+        }
+      })();
+    </script>
+
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap"
+    />
+  </head>
+
+  <body>
+    <div id="root"></div>
+
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

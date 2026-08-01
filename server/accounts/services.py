@@ -12,6 +12,17 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from rest_framework.exceptions import ValidationError
 
+from audit.models import ReportedItem
+from journey.models import Journey
+from reaction.models import (
+    Comment,
+    CommentReply,
+    Like,
+    Notification,
+    SavedJourney,
+    SavedUpdate,
+)
+from score.models import BuilderScore, BuilderScoreHistory
 from shared.services.email import EmailService
 from shared.services.jwt import JWTService
 
@@ -134,6 +145,57 @@ class AccountService:
             },
             recipient=user.email,
         )
+
+    @staticmethod
+    @transaction.atomic
+    def clear_user_data(user):
+        """Delete all user-generated content but keep the account."""
+
+        Journey.objects.filter(owner=user).delete()
+
+        Like.objects.filter(user=user).delete()
+
+        Comment.objects.filter(user=user).delete()
+
+        CommentReply.objects.filter(user=user).delete()
+
+        SavedUpdate.objects.filter(user=user).delete()
+        SavedJourney.objects.filter(user=user).delete()
+
+        Notification.objects.filter(recipient=user).delete()
+        Notification.objects.filter(actor=user).delete()
+
+        ReportedItem.objects.filter(reporter=user).delete()
+
+        profile = user.profile
+        profile.bio = ""
+        profile.avatar_url = None
+        profile.avatar_public_id = None
+        profile.location = ""
+        profile.website = None
+        profile.what_i_do = ""
+        profile.following_count = 0
+        profile.follower_count = 0
+        profile.journey_count = 0
+        profile.save()
+
+        BuilderScore.objects.filter(user=user).delete()
+        BuilderScoreHistory.objects.filter(user=user).delete()
+
+        prefs = user.settings
+        prefs.show_email = False
+        prefs.show_full_name = True
+        prefs.email_notifications = True
+        prefs.show_activity_status = True
+        prefs.allow_direct_messages = True
+        prefs.save()
+
+        user.following_relations.all().delete()
+        user.follower_relations.all().delete()
+
+        # ActivityLog.objects.filter(user=user).delete()
+
+        return True
 
 
 class FollowService:

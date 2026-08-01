@@ -1,5 +1,6 @@
 import logging
 
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
@@ -53,6 +54,7 @@ from .service import (
     TagService,
 )
 
+User = get_user_model()
 logger = logging.getLogger(__name__)
 
 
@@ -73,11 +75,15 @@ class JourneyListPublicView(generics.ListAPIView):
     throttle_classes = [JourneysAnonRateThrottle]
 
     def get_queryset(self):
-        return (
+        qs = (
             Journey.objects.visible_to(self.request.user)
             .select_related("owner", "owner__profile")
             .prefetch_related("owner__profile")
         )
+
+        if self.request.user.is_authenticated:
+            qs = qs.exclude(owner=self.request.user)
+        return qs
 
 
 @extend_schema(tags=["Journey"], summary="List journeys owned by authenticated user")
@@ -102,6 +108,60 @@ class JourneyListMyView(generics.ListAPIView):
             .not_deleted()
             .select_related("owner", "owner__profile")
             .prefetch_related("owner__profile")
+        )
+
+
+@extend_schema(
+    tags=["Journey"],
+    summary="List public journeys for a user",
+)
+class UserJourneyListView(generics.ListAPIView):
+    """
+    List all public journeys belonging to a user.
+
+    GET /api/v1/accounts/users/<username>/journeys/
+    """
+
+    serializer_class = JourneyListSerializer
+    pagination_class = StandardResultsSetPagination
+    permission_classes = [IsAuthenticated]
+
+    filter_backends = [
+        DjangoFilterBackend,
+        SearchFilter,
+        OrderingFilter,
+    ]
+    filterset_class = JourneyFilter
+    search_fields = [
+        "title",
+        "description",
+    ]
+    ordering_fields = [
+        "created_at",
+        "updated_at",
+        "title",
+        "latest_progress",
+    ]
+    ordering = ["-created_at"]
+
+    def get_queryset(self):
+        username = self.kwargs["username"]
+
+        owner = get_object_or_404(
+            User.objects.select_related("profile"),
+            username__iexact=username,
+        )
+
+        return (
+            Journey.objects.filter(
+                owner=owner,
+                visibility=Journey.Visibility.PUBLIC,
+            )
+            .not_deleted()
+            .select_related(
+                "owner",
+                "owner__profile",
+            )
         )
 
 
@@ -620,7 +680,7 @@ class JourneySearchView(generics.ListAPIView):
     serializer_class = JourneyListSerializer
     pagination_class = StandardResultsSetPagination
     filter_backends = [SearchFilter, OrderingFilter]
-    search_fields = ["title", "description"]
+    search_fields = ["title"]
     ordering_fields = ["created_at", "updated_at", "latest_progress"]
     ordering = ["-created_at"]
 

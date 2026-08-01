@@ -249,16 +249,24 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "profile",
             "is_following",
             "is_verified",
+            "created_at",
         )
+
+    def _viewer(self):
+        viewer = self.context.get("viewer")
+        if viewer:
+            return viewer
+
+        request = self.context.get("request")
+        if request and request.user.is_authenticated:
+            return request.user
+
+        return None
 
     def _is_owner(self, obj):
         """Check if requesting user is the profile owner."""
-        request = self.context.get("request")
-        return (
-            request is not None
-            and request.user.is_authenticated
-            and request.user == obj
-        )
+        viewer = self._viewer()
+        return viewer is not None and viewer.pk == obj.pk
 
     def get_email(self, obj):
         """Only show email if owner or preference allows."""
@@ -409,3 +417,29 @@ class MiniUserSerializer(serializers.ModelSerializer):
                 "/upload/", "/upload/q_auto,f_auto,w_200,h_200,c_fill/"
             )
         return None
+
+
+class ClearDataSerializer(serializers.Serializer):
+    """Delete the user Data"""
+
+    confirm = serializers.CharField(max_length=20)
+
+    def validate_confirm(self, value):
+        if value.lower() != "clear":
+            raise serializers.ValidationError(
+                'Please type "clear" to confirm data deletion.'
+            )
+        return value
+
+
+class DeleteAccountSerializer(serializers.Serializer):
+    """Delete the user account"""
+
+    confirm = serializers.CharField(max_length=20)
+
+    def validate_confirm(self, value):
+        if value.lower() != "delete":
+            raise serializers.ValidationError(
+                'Please type "delete" to confirm account deletion.'
+            )
+        return value

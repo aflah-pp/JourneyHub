@@ -205,6 +205,8 @@ class ActivityLog(UUIDPrimaryKeyMixin, TimeStampMixin):
         VERIFY_EMAIL = "VERIFY_EMAIL", "Verify Email"
         PASSWORD_RESET = "PASSWORD_RESET", "Password Reset"
         PASSWORD_CHANGE = "PASSWORD_CHANGE", "Password Change"
+        CLEAR_DATA = "CLEAR_DATA", "Clear Data"
+        DELETE_ACCOUNT = "DELETE ACCOUNT", "Delete Account"
 
         CREATE = "CREATE", "Create"
         UPDATE = "UPDATE", "Update"

@@ -25,6 +25,8 @@ from shared.throttles import (
 
 from .serializers import (
     ChangePasswordSerializer,
+    ClearDataSerializer,
+    DeleteAccountSerializer,
     EmailVerificationSerializer,
     FollowSerializer,
     ForgotPasswordSerializer,
@@ -194,12 +196,13 @@ class LoginView(APIView):
             message="Login successful.",
             data={
                 "access": tokens["access"],
-                "user": {
-                    "id": str(user.id),
-                    "username": user.username,
-                    "email": user.email,
-                    "is_verified": user.is_verified,
-                },
+                "user": UserProfileSerializer(
+                    user,
+                    context={
+                        "request": request,
+                        "viewer": user,
+                    },
+                ).data,
             },
         )
 
@@ -268,8 +271,7 @@ class ForgotPasswordView(APIView):
                 uid = urlsafe_base64_encode(force_bytes(user.pk))
 
                 reset_link = (
-                    f"{settings.FRONTEND_RESET_PASSWORD_URL}"
-                    f"?uid={uid}&token={token}"
+                    f"{settings.FRONTEND_RESET_PASSWORD_URL}" f"uid={uid}/token={token}"
                 )
 
                 EmailService.send(
@@ -558,3 +560,83 @@ class UserPreferenceView(APIView):
             message="Preferences updated successfully.",
             data=serializer.data,
         )
+
+
+@extend_schema(tags=["Authentication"], summary="Clear all user data")
+class ClearUserDataView(APIView):
+    """
+    Permanently delete all user data (journeys, updates, likes, comments, etc.)
+    but keep the account active.
+    Requires typing 'clear' in the request body to confirm.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @transaction.atomic
+    def post(self, request):
+        serializer = ClearDataSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = request.user
+
+        # Log the activity
+        ActivityLogService.log_activity(
+            user=user,
+            action_type=ActivityLog.ActionType.CLEAR_DATA,
+            ip_address=request.META.get("REMOTE_ADDR"),
+            user_agent=request.META.get("HTTP_USER_AGENT", ""),
+            request_path=request.path,
+            request_method=request.method,
+            metadata={
+                "user_id": str(user.id),
+                "username": user.username,
+            },
+        )
+
+        # Clear all user data
+        AccountService.clear_user_data(user)
+
+        logger.info(f"User data cleared for user {user.username} (ID: {user.id})")
+        return APIResponse(message="All your data has been cleared successfully.")
+
+
+@extend_schema(tags=["Authentication"], summary="Delete user account")
+class DeleteAccountView(APIView):
+    """
+    Permanently delete the authenticated user's account.
+    Requires typing 'delete' in the request body to confirm.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @transaction.atomic
+    def delete(self, request):
+        serializer = DeleteAccountSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = request.user
+
+        ActivityLogService.log_activity(
+            user=user,
+            action_type=ActivityLog.ActionType.DELETE_ACCOUNT,
+            ip_address=request.META.get("REMOTE_ADDR"),
+            user_agent=request.META.get("HTTP_USER_AGENT", ""),
+            request_path=request.path,
+            request_method=request.method,
+            metadata={
+                "user_id": str(user.id),
+                "username": user.username,
+            },
+        )
+
+        refresh_token = CookieService.get_refresh_cookie(request)
+        if refresh_token:
+            JWTService.blacklist_refresh_token(refresh_token)
+
+        user.delete()
+
+        response = APIResponse(message="Account deleted successfully.")
+        CookieService.clear_refresh_cookie(response)
+
+        logger.info(f"Account deleted for user {user.username} (ID: {user.id})")
+        return response

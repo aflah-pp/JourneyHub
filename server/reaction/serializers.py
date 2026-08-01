@@ -161,28 +161,25 @@ class AcceptedSolutionSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-class AcceptedSolutionCreateSerializer(serializers.ModelSerializer):
+class AcceptedSolutionCreateSerializer(serializers.Serializer):
     """
     Payload for accepting a solution.
     """
 
-    comment_id = serializers.UUIDField(write_only=True)
+    comment_id = serializers.UUIDField()
 
-    class Meta:
-        model = AcceptedSolution
-        fields = ("comment_id",)
-
-    def validate_comment_id(self, value):
-        """Validate that the comment exists and belongs to the update."""
+    def validate(self, attrs):
         update = self.context["update"]
 
         try:
             comment = Comment.objects.get(
-                id=value, journey_update=update, is_deleted=False
+                id=attrs["comment_id"],
+                journey_update=update,
+                is_deleted=False,
             )
         except Comment.DoesNotExist:
             raise serializers.ValidationError(
-                "Comment not found or does not belong to this update."
+                {"comment_id": ("Comment not found or does not belong to this update.")}
             )
 
         if AcceptedSolution.objects.filter(journey_update=update).exists():
@@ -190,19 +187,8 @@ class AcceptedSolutionCreateSerializer(serializers.ModelSerializer):
                 "A solution has already been accepted for this update."
             )
 
-        self.context["comment"] = comment
-        return value
-
-    def create(self, validated_data):
-        update = self.context["update"]
-        comment = self.context["comment"]
-        accepted_by = self.context["request"].user
-
-        return AcceptedSolution.objects.create(
-            journey_update=update,
-            comment=comment,
-            accepted_by=accepted_by,
-        )
+        attrs["comment"] = comment
+        return attrs
 
 
 class AcceptedSolutionRemoveSerializer(serializers.Serializer):

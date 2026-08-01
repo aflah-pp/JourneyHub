@@ -23,11 +23,13 @@ urlpatterns = [
         "password/change/", views.ChangePasswordView.as_view(), name="password-change"
     ),
     path("me/", views.MeView.as_view(), name="me"),
-    path("users/<str:username>/", views.UserProfileView.as_view(), name="user-profile"),
     path("users/search/", views.UserSearchView.as_view(), name="user-search"),
+    path("users/<str:username>/", views.UserProfileView.as_view(), name="user-profile"),
     path("users/<uuid:user_id>/follow/", views.FollowView.as_view(), name="follow"),
     path(
         "users/<uuid:user_id>/unfollow/", views.UnfollowView.as_view(), name="unfollow"
     ),
     path("preferences/", views.UserPreferenceView.as_view(), name="preferences"),
+    path("me/clear-data/", views.ClearUserDataView.as_view(), name="clear-data"),
+    path("me/delete/", views.DeleteAccountView.as_view(), name="delete_account"),
 ]

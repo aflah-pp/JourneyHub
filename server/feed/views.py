@@ -86,7 +86,7 @@ class LatestFeedView(BaseFeedView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
-        return (
+        qs = (
             JourneyUpdate.objects.filter(
                 Q(visibility=Journey.Visibility.PUBLIC)
                 | Q(
@@ -129,8 +129,12 @@ class LatestFeedView(BaseFeedView):
                     to_attr="saved_prefetched",
                 ),
             )
-            .order_by("-created_at", "-id")
         )
+
+        if self.request.user.is_authenticated:
+            qs = qs.exclude(journey__owner=self.request.user)
+
+        return qs.order_by("-created_at", "-id")
 
 
 class FollowingFeedView(BaseFeedView):
@@ -143,7 +147,6 @@ class FollowingFeedView(BaseFeedView):
 
     def get_queryset(self):
         user = self.request.user
-
         followed_user_ids = user.following_relations.values_list(
             "following_id", flat=True
         )
@@ -151,7 +154,7 @@ class FollowingFeedView(BaseFeedView):
         if not followed_user_ids:
             return JourneyUpdate.objects.none()
 
-        return (
+        qs = (
             JourneyUpdate.objects.filter(
                 Q(visibility=Journey.Visibility.PUBLIC)
                 | Q(
@@ -204,8 +207,11 @@ class FollowingFeedView(BaseFeedView):
                     to_attr="saved_prefetched",
                 ),
             )
-            .order_by("-created_at", "-id")
         )
+
+        qs = qs.exclude(journey__owner=self.request.user)
+
+        return qs.order_by("-created_at", "-id")
 
 
 class HelpNeededFeedView(BaseFeedView):
@@ -217,7 +223,7 @@ class HelpNeededFeedView(BaseFeedView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
-        return (
+        qs = (
             JourneyUpdate.objects.filter(
                 help_needed=True,
                 is_deleted=False,
@@ -263,8 +269,12 @@ class HelpNeededFeedView(BaseFeedView):
                     to_attr="saved_prefetched",
                 ),
             )
-            .order_by("-created_at", "-id")
         )
+
+        if self.request.user.is_authenticated:
+            qs = qs.exclude(journey__owner=self.request.user)
+
+        return qs.order_by("-created_at", "-id")
 
 
 class TrendingFeedView(BaseFeedView):
@@ -276,7 +286,7 @@ class TrendingFeedView(BaseFeedView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
-        return (
+        qs = (
             JourneyUpdate.objects.filter(
                 Q(visibility=Journey.Visibility.PUBLIC)
                 | Q(
@@ -319,8 +329,12 @@ class TrendingFeedView(BaseFeedView):
                     to_attr="saved_prefetched",
                 ),
             )
-            .order_by("-trending_score", "-created_at", "-id")
         )
+
+        if self.request.user.is_authenticated:
+            qs = qs.exclude(journey__owner=self.request.user)
+
+        return qs.order_by("-trending_score", "-created_at", "-id")
 
 
 class JourneyTimelineView(BaseFeedView):
