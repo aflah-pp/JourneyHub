@@ -43,7 +43,9 @@ class JourneyImageSerializer(serializers.ModelSerializer):
 
     def get_cloudinary_url(self, obj):
         if obj.image:
-            return obj.image.url.replace("/upload/", "/upload/q_auto,f_auto,w_600,h_400,c_limit/")
+            return obj.image.url.replace(
+                "/upload/", "/upload/q_auto,f_auto,w_600,h_400,c_limit/"
+            )
         return None
 
 
@@ -88,7 +90,9 @@ class JourneyListSerializer(serializers.ModelSerializer):
 
     def get_cover_image_url(self, obj):
         if obj.cover_image:
-            return obj.cover_image.url.replace("/upload/", "/upload/q_auto,f_auto,w_400,h_200,c_fill/")
+            return obj.cover_image.url.replace(
+                "/upload/", "/upload/q_auto,f_auto,w_400,h_200,c_fill/"
+            )
         return None
 
 
@@ -121,7 +125,9 @@ class JourneyDetailSerializer(serializers.ModelSerializer):
 
     def get_cover_image_url(self, obj):
         if obj.cover_image:
-            return obj.cover_image.url.replace("/upload/", "/upload/q_auto,f_auto,w_800,h_400,c_fill/")
+            return obj.cover_image.url.replace(
+                "/upload/", "/upload/q_auto,f_auto,w_800,h_400,c_fill/"
+            )
         return None
 
     def get_is_saved_by_me(self, obj):
@@ -132,7 +138,9 @@ class JourneyDetailSerializer(serializers.ModelSerializer):
 
         try:
             if hasattr(obj, "saved_prefetched") and obj.saved_prefetched is not None:
-                return any(save.user_id == request.user.id for save in obj.saved_prefetched)
+                return any(
+                    save.user_id == request.user.id for save in obj.saved_prefetched
+                )
             return SavedJourney.objects.filter(user=request.user, journey=obj).exists()
         except Exception:
             return False
@@ -268,7 +276,9 @@ class JourneyUpdateDetailSerializer(serializers.ModelSerializer):
 
         try:
             if hasattr(obj, "likes_prefetched") and obj.likes_prefetched is not None:
-                return any(like.user_id == request.user.id for like in obj.likes_prefetched)
+                return any(
+                    like.user_id == request.user.id for like in obj.likes_prefetched
+                )
             return Like.objects.filter(user=request.user, journey_update=obj).exists()
         except Exception:
             return False
@@ -281,7 +291,9 @@ class JourneyUpdateDetailSerializer(serializers.ModelSerializer):
 
         try:
             if hasattr(obj, "saved_prefetched") and obj.saved_prefetched is not None:
-                return any(save.user_id == request.user.id for save in obj.saved_prefetched)
+                return any(
+                    save.user_id == request.user.id for save in obj.saved_prefetched
+                )
             return SavedUpdate.objects.filter(user=request.user, update=obj).exists()
         except Exception:
             return False

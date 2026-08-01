@@ -132,7 +132,9 @@ class ScoreHistoryView(generics.ListAPIView):
 
     def get_queryset(self):
         return (
-            BuilderScoreHistory.objects.filter(user=self.request.user).select_related("user").order_by("-created_at")
+            BuilderScoreHistory.objects.filter(user=self.request.user)
+            .select_related("user")
+            .order_by("-created_at")
         )
 
     def list(self, request, *args, **kwargs):

@@ -43,7 +43,9 @@ class FeedbackService:
 
     @staticmethod
     @transaction.atomic
-    def resolve_feedback(feedback_id: str, resolved_by: User, resolution_note: str = ""):
+    def resolve_feedback(
+        feedback_id: str, resolved_by: User, resolution_note: str = ""
+    ):
         """Resolve a feedback."""
         feedback = Feedback.objects.get(id=feedback_id)
         feedback.resolve(resolved_by, resolution_note)

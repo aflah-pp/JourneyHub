@@ -13,8 +13,23 @@ class FeedbackAdmin(admin.ModelAdmin):
     ordering = ("-created_at",)
 
     fieldsets = (
-        ("Feedback", {"fields": ("user", "feedback_type", "subject", "message", "rating", "is_anonymous")}),
-        ("Status", {"fields": ("status", "resolved_at", "resolved_by", "resolution_note")}),
+        (
+            "Feedback",
+            {
+                "fields": (
+                    "user",
+                    "feedback_type",
+                    "subject",
+                    "message",
+                    "rating",
+                    "is_anonymous",
+                )
+            },
+        ),
+        (
+            "Status",
+            {"fields": ("status", "resolved_at", "resolved_by", "resolution_note")},
+        ),
         (
             "Admin",
             {

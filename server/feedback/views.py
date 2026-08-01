@@ -68,7 +68,9 @@ class FeedbackListView(generics.ListAPIView):
         user = self.request.user
         if user.is_staff:
             return Feedback.objects.select_related("user", "user__profile").all()
-        return Feedback.objects.filter(user=user).select_related("user", "user__profile")
+        return Feedback.objects.filter(user=user).select_related(
+            "user", "user__profile"
+        )
 
 
 class FeedbackDetailView(generics.RetrieveUpdateAPIView):

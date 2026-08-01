@@ -14,7 +14,14 @@ from rest_framework.exceptions import ValidationError
 
 from audit.models import ReportedItem
 from journey.models import Journey
-from reaction.models import Comment, CommentReply, Like, Notification, SavedJourney, SavedUpdate
+from reaction.models import (
+    Comment,
+    CommentReply,
+    Like,
+    Notification,
+    SavedJourney,
+    SavedUpdate,
+)
 from score.models import BuilderScore, BuilderScoreHistory
 from shared.services.email import EmailService
 from shared.services.jwt import JWTService
@@ -43,14 +50,20 @@ class AccountService:
 
         if user.locked_until and user.locked_until > timezone.now():
             remaining = user.locked_until - timezone.now()
-            raise ValidationError({"login": f"Account locked. Try again in {remaining.seconds // 60} minutes."})
+            raise ValidationError(
+                {
+                    "login": f"Account locked. Try again in {remaining.seconds // 60} minutes."
+                }
+            )
 
         if not user.is_active:
             raise ValidationError({"login": "Account is deactivated."})
 
         if user.is_suspended:
             raise ValidationError(
-                {"login": f"Account suspended. Reason: {user.suspension_reason or 'Contact support.'}"}
+                {
+                    "login": f"Account suspended. Reason: {user.suspension_reason or 'Contact support.'}"
+                }
             )
 
         authenticated_user = authenticate(
@@ -203,8 +216,12 @@ class FollowService:
             following=following,
         )
 
-        Profile.objects.filter(user=follower).update(following_count=F("following_count") + 1)
-        Profile.objects.filter(user=following).update(follower_count=F("follower_count") + 1)
+        Profile.objects.filter(user=follower).update(
+            following_count=F("following_count") + 1
+        )
+        Profile.objects.filter(user=following).update(
+            follower_count=F("follower_count") + 1
+        )
 
         # TODO - Create Notification here!!
         return True
@@ -221,8 +238,12 @@ class FollowService:
         if deleted_count == 0:
             raise ValidationError({"detail": "You are not following this user."})
 
-        Profile.objects.filter(user=follower).update(following_count=F("following_count") - 1)
-        Profile.objects.filter(user=following).update(follower_count=F("follower_count") - 1)
+        Profile.objects.filter(user=follower).update(
+            following_count=F("following_count") - 1
+        )
+        Profile.objects.filter(user=following).update(
+            follower_count=F("follower_count") - 1
+        )
 
         return True
 

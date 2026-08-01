@@ -145,7 +145,9 @@ class AcceptedSolutionSerializer(serializers.ModelSerializer):
 
     comment = CommentSerializer(read_only=True)
     accepted_by = MiniUserSerializer(read_only=True)
-    journey_update_id = serializers.UUIDField(source="journey_update.id", read_only=True)
+    journey_update_id = serializers.UUIDField(
+        source="journey_update.id", read_only=True
+    )
 
     class Meta:
         model = AcceptedSolution
@@ -176,10 +178,14 @@ class AcceptedSolutionCreateSerializer(serializers.Serializer):
                 is_deleted=False,
             )
         except Comment.DoesNotExist:
-            raise serializers.ValidationError({"comment_id": ("Comment not found or does not belong to this update.")})
+            raise serializers.ValidationError(
+                {"comment_id": ("Comment not found or does not belong to this update.")}
+            )
 
         if AcceptedSolution.objects.filter(journey_update=update).exists():
-            raise serializers.ValidationError("A solution has already been accepted for this update.")
+            raise serializers.ValidationError(
+                "A solution has already been accepted for this update."
+            )
 
         attrs["comment"] = comment
         return attrs

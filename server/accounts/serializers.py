@@ -57,7 +57,9 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate_username(self, value):
         if User.objects.filter(username__iexact=value).exists():
-            raise serializers.ValidationError("A user with this username already exists.")
+            raise serializers.ValidationError(
+                "A user with this username already exists."
+            )
         return value.lower()
 
     def validate_email(self, value):
@@ -74,7 +76,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         confirm_password = attrs.get("confirm_password")
 
         if password != confirm_password:
-            raise serializers.ValidationError({"confirm_password": "Passwords do not match."})
+            raise serializers.ValidationError(
+                {"confirm_password": "Passwords do not match."}
+            )
         return attrs
 
     @transaction.atomic
@@ -154,7 +158,9 @@ class ResetPasswordSerializer(serializers.Serializer):
     def validate(self, attrs):
         """Validate password confirmation."""
         if attrs["password"] != attrs["confirm_password"]:
-            raise serializers.ValidationError({"confirm_password": "Passwords do not match."})
+            raise serializers.ValidationError(
+                {"confirm_password": "Passwords do not match."}
+            )
         return attrs
 
 
@@ -181,7 +187,9 @@ class ChangePasswordSerializer(serializers.Serializer):
     def validate(self, attrs):
         """Validate password confirmation."""
         if attrs["new_password"] != attrs["confirm_password"]:
-            raise serializers.ValidationError({"confirm_password": "Passwords do not match."})
+            raise serializers.ValidationError(
+                {"confirm_password": "Passwords do not match."}
+            )
         return attrs
 
 
@@ -213,7 +221,9 @@ class ProfileSerializer(serializers.ModelSerializer):
     def get_avatar_url(self, obj):
         """Return optimized Cloudinary URL."""
         if obj.avatar:
-            return obj.avatar.url.replace("/upload/", "/upload/q_auto,f_auto,w_200,h_200,c_fill/")
+            return obj.avatar.url.replace(
+                "/upload/", "/upload/q_auto,f_auto,w_200,h_200,c_fill/"
+            )
         return None
 
 
@@ -318,7 +328,11 @@ class MeUpdateSerializer(serializers.ModelSerializer):
         value = value.lower().strip()
         validate_email_domain(value)
 
-        if User.objects.exclude(pk=self.instance.pk).filter(email__iexact=value).exists():
+        if (
+            User.objects.exclude(pk=self.instance.pk)
+            .filter(email__iexact=value)
+            .exists()
+        ):
             raise serializers.ValidationError("Email already exists.")
         return value
 
@@ -399,7 +413,9 @@ class MiniUserSerializer(serializers.ModelSerializer):
     def get_avatar_url(self, obj):
         profile = getattr(obj, "profile", None)
         if profile and profile.avatar:
-            return profile.avatar.url.replace("/upload/", "/upload/q_auto,f_auto,w_200,h_200,c_fill/")
+            return profile.avatar.url.replace(
+                "/upload/", "/upload/q_auto,f_auto,w_200,h_200,c_fill/"
+            )
         return None
 
 
@@ -410,7 +426,9 @@ class ClearDataSerializer(serializers.Serializer):
 
     def validate_confirm(self, value):
         if value.lower() != "clear":
-            raise serializers.ValidationError('Please type "clear" to confirm data deletion.')
+            raise serializers.ValidationError(
+                'Please type "clear" to confirm data deletion.'
+            )
         return value
 
 
@@ -421,5 +439,7 @@ class DeleteAccountSerializer(serializers.Serializer):
 
     def validate_confirm(self, value):
         if value.lower() != "delete":
-            raise serializers.ValidationError('Please type "delete" to confirm account deletion.')
+            raise serializers.ValidationError(
+                'Please type "delete" to confirm account deletion.'
+            )
         return value

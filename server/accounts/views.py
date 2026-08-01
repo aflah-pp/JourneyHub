@@ -44,7 +44,9 @@ User = get_user_model()
 logger = logging.getLogger(__name__)
 
 
-@extend_schema(tags=["Authentication"], summary="User registration with email verification")
+@extend_schema(
+    tags=["Authentication"], summary="User registration with email verification"
+)
 class RegisterView(APIView):
     """
     User registration with email verification.
@@ -241,7 +243,9 @@ class LogoutView(APIView):
         return response
 
 
-@extend_schema(tags=["Password Management"], summary="Send password reset link via email")
+@extend_schema(
+    tags=["Password Management"], summary="Send password reset link via email"
+)
 class ForgotPasswordView(APIView):
     """
     Send password reset link via email.
@@ -266,7 +270,9 @@ class ForgotPasswordView(APIView):
                 token = default_token_generator.make_token(user)
                 uid = urlsafe_base64_encode(force_bytes(user.pk))
 
-                reset_link = f"{settings.FRONTEND_RESET_PASSWORD_URL}" f"uid={uid}/token={token}"
+                reset_link = (
+                    f"{settings.FRONTEND_RESET_PASSWORD_URL}" f"uid={uid}/token={token}"
+                )
 
                 EmailService.send(
                     subject="Password Reset Request",
@@ -337,7 +343,9 @@ class ResetPasswordView(APIView):
         )
 
 
-@extend_schema(tags=["Password Management"], summary="Change password for authenticated user")
+@extend_schema(
+    tags=["Password Management"], summary="Change password for authenticated user"
+)
 class ChangePasswordView(APIView):
     """
     Change password for authenticated user.
@@ -461,7 +469,9 @@ class UserSearchView(APIView):
         except User.DoesNotExist:
             pass
 
-        users = User.objects.filter(username__icontains=query).select_related("profile")[:10]
+        users = User.objects.filter(username__icontains=query).select_related(
+            "profile"
+        )[:10]
 
         serializer = MiniUserSerializer(users, many=True, context={"request": request})
         return APIResponse(

@@ -31,13 +31,17 @@ def get_ip_user_agent():
 def increment_like_count(sender, instance, created, **kwargs):
     """Increment denormalized like_count on JourneyUpdate."""
     if created:
-        JourneyUpdate.objects.filter(id=instance.journey_update_id).update(like_count=F("like_count") + 1)
+        JourneyUpdate.objects.filter(id=instance.journey_update_id).update(
+            like_count=F("like_count") + 1
+        )
 
 
 @receiver(post_delete, sender=Like)
 def decrement_like_count(sender, instance, **kwargs):
     """Decrement denormalized like_count on JourneyUpdate."""
-    JourneyUpdate.objects.filter(id=instance.journey_update_id).update(like_count=Greatest(F("like_count") - 1, 0))
+    JourneyUpdate.objects.filter(id=instance.journey_update_id).update(
+        like_count=Greatest(F("like_count") - 1, 0)
+    )
 
 
 @receiver(post_save, sender=Like)
@@ -115,7 +119,9 @@ def deduct_score_on_unlike(sender, instance, **kwargs):
 def increment_comment_count_on_save(sender, instance, created, **kwargs):
     """Increment denormalized comment_count on JourneyUpdate."""
     if created and not instance.is_deleted:
-        JourneyUpdate.objects.filter(id=instance.journey_update_id).update(comment_count=F("comment_count") + 1)
+        JourneyUpdate.objects.filter(id=instance.journey_update_id).update(
+            comment_count=F("comment_count") + 1
+        )
 
 
 @receiver(pre_save, sender=Comment)

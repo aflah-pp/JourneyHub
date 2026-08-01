@@ -11,7 +11,9 @@ class FeedbackSerializer(serializers.ModelSerializer):
 
     user = MiniUserSerializer(read_only=True)
     display_username = serializers.CharField(read_only=True)
-    feedback_type_label = serializers.CharField(source="get_feedback_type_display", read_only=True)
+    feedback_type_label = serializers.CharField(
+        source="get_feedback_type_display", read_only=True
+    )
     status_label = serializers.CharField(source="get_status_display", read_only=True)
 
     class Meta:
@@ -52,7 +54,9 @@ class FeedbackCreateSerializer(serializers.ModelSerializer):
     feedback_type = serializers.ChoiceField(choices=FeedbackType.choices)
     subject = serializers.CharField(max_length=200)
     message = serializers.CharField()
-    rating = serializers.IntegerField(min_value=1, max_value=5, required=False, allow_null=True)
+    rating = serializers.IntegerField(
+        min_value=1, max_value=5, required=False, allow_null=True
+    )
     is_anonymous = serializers.BooleanField(default=False, required=False)
 
     class Meta:

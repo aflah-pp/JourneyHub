@@ -39,7 +39,7 @@ THIRD_PARTY_APPS = [
     "cloudinary",
 ]
 
-SELF_APPS = ["accounts", "audit", "journey", "score", "reaction", "feed","feedback"]
+SELF_APPS = ["accounts", "audit", "journey", "score", "reaction", "feed", "feedback"]
 
 INSTALLED_APPS = DEFAULT_APPS + THIRD_PARTY_APPS + SELF_APPS
 
@@ -114,7 +114,11 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # CORS CONFIG
-CORS_ALLOWED_ORIGINS = ["http://localhost:8080", "http://127.0.0.1:8000", "http://localhost:5173"]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8080",
+    "http://127.0.0.1:8000",
+    "http://localhost:5173",
+]
 
 CORS_ALLOW_CREDENTIALS = True
 

@@ -39,7 +39,9 @@ class TelegramService:
                 logger.info("Telegram message sent successfully.")
                 return True
             else:
-                logger.error(f"Telegram API error: {response.status_code} - {response.text}")
+                logger.error(
+                    f"Telegram API error: {response.status_code} - {response.text}"
+                )
                 return False
         except Exception as e:
             logger.error(f"Failed to send Telegram message: {str(e)}")
@@ -50,8 +52,12 @@ class TelegramService:
         """Format feedback as a Telegram message."""
         from feedback.models import FeedbackStatus, FeedbackType
 
-        type_label = dict(FeedbackType.choices).get(feedback.feedback_type, feedback.feedback_type)
-        status_label = dict(FeedbackStatus.choices).get(feedback.status, feedback.status)
+        type_label = dict(FeedbackType.choices).get(
+            feedback.feedback_type, feedback.feedback_type
+        )
+        status_label = dict(FeedbackStatus.choices).get(
+            feedback.status, feedback.status
+        )
 
         message = (
             f"<b>📝 New Feedback</b>\n"
@@ -66,7 +72,9 @@ class TelegramService:
         if feedback.rating:
             message += f"<b>Rating:</b> {'⭐' * feedback.rating}\n"
 
-        message += f"\n<i>Submitted: {feedback.created_at.strftime('%Y-%m-%d %H:%M UTC')}</i>"
+        message += (
+            f"\n<i>Submitted: {feedback.created_at.strftime('%Y-%m-%d %H:%M UTC')}</i>"
+        )
 
         return message
 

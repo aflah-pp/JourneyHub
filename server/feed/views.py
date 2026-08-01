@@ -97,8 +97,12 @@ class LatestFeedView(BaseFeedView):
                 journey__is_deleted=False,
             )
             .annotate(
-                safe_like_count=Coalesce("like_count", Value(0), output_field=IntegerField()),
-                safe_comment_count=Coalesce("comment_count", Value(0), output_field=IntegerField()),
+                safe_like_count=Coalesce(
+                    "like_count", Value(0), output_field=IntegerField()
+                ),
+                safe_comment_count=Coalesce(
+                    "comment_count", Value(0), output_field=IntegerField()
+                ),
             )
             .select_related(
                 "journey",
@@ -109,7 +113,9 @@ class LatestFeedView(BaseFeedView):
                 "images",
                 Prefetch(
                     "tags",
-                    queryset=JourneyUpdateTag.objects.select_related("tag").order_by("tag__name"),
+                    queryset=JourneyUpdateTag.objects.select_related("tag").order_by(
+                        "tag__name"
+                    ),
                     to_attr="tags_prefetched",
                 ),
                 Prefetch(
@@ -141,7 +147,9 @@ class FollowingFeedView(BaseFeedView):
 
     def get_queryset(self):
         user = self.request.user
-        followed_user_ids = user.following_relations.values_list("following_id", flat=True)
+        followed_user_ids = user.following_relations.values_list(
+            "following_id", flat=True
+        )
 
         if not followed_user_ids:
             return JourneyUpdate.objects.none()
@@ -167,8 +175,12 @@ class FollowingFeedView(BaseFeedView):
                 journey__owner__in=followed_user_ids,
             )
             .annotate(
-                safe_like_count=Coalesce("like_count", Value(0), output_field=IntegerField()),
-                safe_comment_count=Coalesce("comment_count", Value(0), output_field=IntegerField()),
+                safe_like_count=Coalesce(
+                    "like_count", Value(0), output_field=IntegerField()
+                ),
+                safe_comment_count=Coalesce(
+                    "comment_count", Value(0), output_field=IntegerField()
+                ),
             )
             .select_related(
                 "journey",
@@ -179,7 +191,9 @@ class FollowingFeedView(BaseFeedView):
                 "images",
                 Prefetch(
                     "tags",
-                    queryset=JourneyUpdateTag.objects.select_related("tag").order_by("tag__name"),
+                    queryset=JourneyUpdateTag.objects.select_related("tag").order_by(
+                        "tag__name"
+                    ),
                     to_attr="tags_prefetched",
                 ),
                 Prefetch(
@@ -223,8 +237,12 @@ class HelpNeededFeedView(BaseFeedView):
                 )
             )
             .annotate(
-                safe_like_count=Coalesce("like_count", Value(0), output_field=IntegerField()),
-                safe_comment_count=Coalesce("comment_count", Value(0), output_field=IntegerField()),
+                safe_like_count=Coalesce(
+                    "like_count", Value(0), output_field=IntegerField()
+                ),
+                safe_comment_count=Coalesce(
+                    "comment_count", Value(0), output_field=IntegerField()
+                ),
             )
             .select_related(
                 "journey",
@@ -235,7 +253,9 @@ class HelpNeededFeedView(BaseFeedView):
                 "images",
                 Prefetch(
                     "tags",
-                    queryset=JourneyUpdateTag.objects.select_related("tag").order_by("tag__name"),
+                    queryset=JourneyUpdateTag.objects.select_related("tag").order_by(
+                        "tag__name"
+                    ),
                     to_attr="tags_prefetched",
                 ),
                 Prefetch(
@@ -277,8 +297,12 @@ class TrendingFeedView(BaseFeedView):
                 journey__is_deleted=False,
             )
             .annotate(
-                safe_like_count=Coalesce("like_count", Value(0), output_field=IntegerField()),
-                safe_comment_count=Coalesce("comment_count", Value(0), output_field=IntegerField()),
+                safe_like_count=Coalesce(
+                    "like_count", Value(0), output_field=IntegerField()
+                ),
+                safe_comment_count=Coalesce(
+                    "comment_count", Value(0), output_field=IntegerField()
+                ),
             )
             .select_related(
                 "journey",
@@ -289,7 +313,9 @@ class TrendingFeedView(BaseFeedView):
                 "images",
                 Prefetch(
                     "tags",
-                    queryset=JourneyUpdateTag.objects.select_related("tag").order_by("tag__name"),
+                    queryset=JourneyUpdateTag.objects.select_related("tag").order_by(
+                        "tag__name"
+                    ),
                     to_attr="tags_prefetched",
                 ),
                 Prefetch(

@@ -87,7 +87,9 @@ class Feedback(UUIDPrimaryKeyMixin, TimeStampMixin):
         self.resolved_by = resolved_by
         if resolution_note:
             self.resolution_note = resolution_note
-        self.save(update_fields=["status", "resolved_at", "resolved_by", "resolution_note"])
+        self.save(
+            update_fields=["status", "resolved_at", "resolved_by", "resolution_note"]
+        )
 
     @property
     def display_username(self):
